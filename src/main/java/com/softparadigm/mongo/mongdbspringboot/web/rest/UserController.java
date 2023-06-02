@@ -97,5 +97,10 @@ public class UserController {
         return userService.getPopulationByCity();
     }
 
+    @GetMapping("/getUsersWithMatchingSkills")
+    public List<Document> getUsersWithMatchingSkills(@RequestParam("skill") String skill) {
+        return userService.getUsersWithMatchingSkills(skill);
+    }
+
 
 }

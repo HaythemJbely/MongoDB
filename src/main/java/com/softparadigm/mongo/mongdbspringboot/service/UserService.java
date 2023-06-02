@@ -21,4 +21,6 @@ public interface UserService {
     List<Document> getOldestUserByCity();
 
     List<Document> getPopulationByCity();
+
+    List<Document> getUsersWithMatchingSkills(String skill);
 }

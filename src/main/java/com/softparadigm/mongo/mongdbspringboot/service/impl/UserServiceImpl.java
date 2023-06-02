@@ -107,5 +107,14 @@ public class UserServiceImpl implements UserService {
 
         return documents;
     }
+
+    @Override
+    public List<Document> getUsersWithMatchingSkills(String skill) {
+        MatchOperation matchOperation = Aggregation.match(Criteria.where("skills").in(skill));
+        ProjectionOperation projectionOperation = Aggregation.project("name","skills").andExclude("_id");
+        Aggregation aggregation = Aggregation.newAggregation(matchOperation,projectionOperation);
+        List<Document> results = mongoTemplate.aggregate(aggregation, User.class, Document.class).getMappedResults();
+        return results;
+    }
 }
 
