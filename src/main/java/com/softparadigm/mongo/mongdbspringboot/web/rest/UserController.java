@@ -3,9 +3,6 @@ package com.softparadigm.mongo.mongdbspringboot.web.rest;
 import com.softparadigm.mongo.mongdbspringboot.domain.User;
 import com.softparadigm.mongo.mongdbspringboot.repository.UserRepository;
 import com.softparadigm.mongo.mongdbspringboot.service.UserService;
-import com.softparadigm.mongo.mongdbspringboot.strategyDesignPattern.CinValidationStrategy;
-import com.softparadigm.mongo.mongdbspringboot.strategyDesignPattern.NameValidationStrategy;
-import com.softparadigm.mongo.mongdbspringboot.strategyDesignPattern.UserValidationStrategy;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -41,17 +38,9 @@ public class UserController {
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
-            UserValidationStrategy validationId= new NameValidationStrategy();
-            UserValidationStrategy validationName= new NameValidationStrategy();
-            UserValidationStrategy validationCin= new CinValidationStrategy();
-
-            boolean isValidId = validationId.validate(user);
-            boolean isValidName = validationName.validate(user);
-            boolean isValidCin = validationCin.validate(user);
-            boolean isValid = isValidId && isValidName && isValidCin;
-            user.setValidated(isValid);
+            user.setValidated(userService.validateUser(user));
             userRepository.save(user);
-            return isValid;
+            return userService.validateUser(user);
         } else {
             throw new IllegalArgumentException("User not found with ID: " + userId);
         }

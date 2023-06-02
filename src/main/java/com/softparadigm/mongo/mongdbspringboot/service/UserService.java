@@ -8,6 +8,9 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface UserService {
+
+    boolean validateUser(User user);
+
     String save(User user);
 
     List<User> getUserStartWith(String name);
