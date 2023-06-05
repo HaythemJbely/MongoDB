@@ -1,18 +1,16 @@
 package com.softparadigm.mongo.mongdbspringboot.domain;
 
+import com.softparadigm.mongo.mongdbspringboot.service.Burger;
 import com.softparadigm.mongo.mongdbspringboot.service.Visitor;
 import lombok.Getter;
 
 
-@Getter
-public class Restaurant extends Client{
-
-    public Restaurant(String name, String address, String number) {
-        super(name, address, number);
+public abstract class Restaurant {
+    public void orderBurger() {
+        System.out.println("Ordering Burger...");
+        Burger burger = createBurger();
+        burger.prepare();
     }
 
-    @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
+    public abstract Burger createBurger();
 }

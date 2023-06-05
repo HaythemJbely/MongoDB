@@ -11,10 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Service;
 
@@ -187,5 +189,21 @@ public class UserServiceImpl implements UserService {
         List<Document> results = mongoTemplate.aggregate(aggregation, User.class, Document.class).getMappedResults();
         return results;
     }
+
+    /**
+     * Updates the first user with the matching old name to the new name.
+     * @param oldName The old name to search for.
+     * @param newName The new name to update.
+     * @return The updated user object, or null if no matching user is found.
+     */
+    @Override
+    public User updateFirst(String oldName, String newName) {
+        Query query = new Query(Criteria.where("name").regex(oldName));
+        Update update = new Update().set("name", newName);
+        FindAndModifyOptions options = new FindAndModifyOptions().returnNew(true);
+        User updatedUser = mongoTemplate.findAndModify(query, update, options, User.class);
+        return updatedUser;
+    }
+
 }
 

@@ -26,4 +26,6 @@ public interface UserService {
     List<Document> getPopulationByCity();
 
     List<Document> getUsersWithMatchingSkills(String skill);
+
+    User updateFirst(String oldName, String newName);
 }
