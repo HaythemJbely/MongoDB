@@ -2,6 +2,7 @@ package com.softparadigm.mongo.mongdbspringboot.service.impl;
 
 import com.softparadigm.mongo.mongdbspringboot.domain.Bank;
 import com.softparadigm.mongo.mongdbspringboot.domain.Client;
+import com.softparadigm.mongo.mongdbspringboot.domain.Insurance;
 import com.softparadigm.mongo.mongdbspringboot.domain.Restaurant;
 import com.softparadigm.mongo.mongdbspringboot.service.Visitor;
 
@@ -20,7 +21,7 @@ public class VisitorMessagingImpl implements Visitor {
     }
 
     @Override
-    public void visit(Restaurant restaurant) {
-        System.out.println("Sending mail when visiting bank to : " + restaurant.getName());
+    public void visit(Insurance insurance) {
+        System.out.println("Sending mail when visiting insurance to : " + insurance.getName());
     }
 }
