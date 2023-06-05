@@ -14,11 +14,10 @@ import java.util.List;
 public class User {
     @Id
     private String userId;
-    private String name;
+    protected String name;
     private Long cin;
     private Long age;
     private boolean isValidated;
     private List<String> skills;
     private List<Address> addresses;
-
 }
