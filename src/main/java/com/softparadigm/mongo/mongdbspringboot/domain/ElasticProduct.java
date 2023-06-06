@@ -27,7 +27,7 @@ public class ElasticProduct {
     @Field(type= FieldType.Integer, name="quantity")
     private Integer quantity;
 
-    @Field(type= FieldType.Text, name="sportsCategory")
+    @Field(type= FieldType.Text, fielddata = true, name="sportsCategory")
     private String sportsCategory;
 
     @Field(type= FieldType.Text, name="manufacturer")

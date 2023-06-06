@@ -3,8 +3,13 @@ package com.softparadigm.mongo.mongdbspringboot.service.impl;
 import com.softparadigm.mongo.mongdbspringboot.domain.ElasticProduct;
 import com.softparadigm.mongo.mongdbspringboot.domain.ElasticProductRequest;
 import com.softparadigm.mongo.mongdbspringboot.service.ElasticProductService;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -13,14 +18,21 @@ import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.Query;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.sort.SortBuilders;
 import org.springframework.data.elasticsearch.core.SearchHits;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class ElasticProductServiceImpl implements ElasticProductService {
+    @Autowired
+    private  RestHighLevelClient elasticClient;
 
     @Autowired
     private ElasticsearchOperations elasticsearchOperations;
@@ -54,4 +66,31 @@ public class ElasticProductServiceImpl implements ElasticProductService {
             productList.add(productHit.getContent());
         });
         return productList;    }
+
+    @Override
+    public SearchResponse getProductAggregations(String searchQuery, Integer minPrice, Integer maxPrice) throws IOException {
+        SearchRequest searchRequest = new SearchRequest("elasticproductindex");
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+
+        // Set the search query if provided
+        if (searchQuery != null && !searchQuery.isEmpty()) {
+            searchSourceBuilder.query(QueryBuilders.matchQuery("productName", searchQuery).fuzziness(Fuzziness.AUTO));
+        }
+
+        // Set the price range filter if provided
+        if (minPrice != null || maxPrice != null) {
+            searchSourceBuilder.query(QueryBuilders.rangeQuery("productPrice")
+                    .gte(minPrice != null ? minPrice : 0)
+                    .lte(maxPrice != null ? maxPrice : Integer.MAX_VALUE));
+        }
+
+        // Add sorting by productPrice in descending order
+        searchSourceBuilder.sort(SortBuilders.fieldSort("productPrice").order(SortOrder.DESC));
+
+        // Set the size to control the number of documents returned
+        searchSourceBuilder.size(10);
+
+        searchRequest.source(searchSourceBuilder);
+
+        return elasticClient.search(searchRequest, RequestOptions.DEFAULT);    }
 }
