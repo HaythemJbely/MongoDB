@@ -36,6 +36,12 @@ public class ElasticProductServiceImpl implements ElasticProductService {
 
     @Autowired
     private ElasticsearchOperations elasticsearchOperations;
+
+    /**
+     * Creates a product index in Elasticsearch based on the provided ElasticProductRequest.
+     * @param elasticProductRequest The ElasticProductRequest containing the product information.
+     * @return The document ID of the created index in Elasticsearch.
+     */
     @Override
     public String createProductIndex(ElasticProductRequest elasticProductRequest) {
         ModelMapper modelMapper = new ModelMapper();
@@ -49,6 +55,11 @@ public class ElasticProductServiceImpl implements ElasticProductService {
         return documentId;
     }
 
+    /**
+     * Finds products in Elasticsearch by the specified manufacturer.
+     * @param manufacturer The manufacturer name to search for.
+     * @return A list of ElasticProduct objects matching the specified manufacturer.
+     */
     @Override
     public List<ElasticProduct> findProductByManufacturer(String manufacturer) {
         QueryBuilder queryBuilder = QueryBuilders.matchQuery("manufacturer",manufacturer);
@@ -65,8 +76,17 @@ public class ElasticProductServiceImpl implements ElasticProductService {
         productHits.forEach( productHit -> {
             productList.add(productHit.getContent());
         });
-        return productList;    }
+        return productList;
+    }
 
+    /**
+     * Retrieves product aggregations from Elasticsearch based on the provided search query, minimum price, and maximum price.
+     * @param searchQuery The search query string.
+     * @param minPrice The minimum price value for filtering.
+     * @param maxPrice The maximum price value for filtering.
+     * @return A SearchResponse containing the aggregated results.
+     * @throws IOException If an error occurs while performing the Elasticsearch search.
+     */
     @Override
     public SearchResponse getProductAggregations(String searchQuery, Integer minPrice, Integer maxPrice) throws IOException {
         SearchRequest searchRequest = new SearchRequest("elasticproductindex");
@@ -92,5 +112,6 @@ public class ElasticProductServiceImpl implements ElasticProductService {
 
         searchRequest.source(searchSourceBuilder);
 
-        return elasticClient.search(searchRequest, RequestOptions.DEFAULT);    }
+        return elasticClient.search(searchRequest, RequestOptions.DEFAULT);
+    }
 }
