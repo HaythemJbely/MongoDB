@@ -1,6 +1,7 @@
 package com.softparadigm.mongo.mongdbspringboot.service.impl;
 
 import com.softparadigm.mongo.mongdbspringboot.domain.Photo;
+import com.softparadigm.mongo.mongdbspringboot.exception.PhotoNotFoundException;
 import com.softparadigm.mongo.mongdbspringboot.repository.PhotoRepository;
 import com.softparadigm.mongo.mongdbspringboot.service.PhotoService;
 import org.bson.BsonBinarySubType;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @Service
 public class PhotoServiceImpl implements PhotoService {
@@ -27,6 +29,11 @@ public class PhotoServiceImpl implements PhotoService {
 
     @Override
     public Photo getPhoto(String id) {
-        return photoRepository.findById(id).get();
+        Optional<Photo> photo = photoRepository.findById(id);
+        if(photo.isPresent()) {
+            return photo.get();
+        } else {
+            throw new PhotoNotFoundException("Photo not found with ID: " + id);
+        }
     }
 }

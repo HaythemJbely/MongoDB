@@ -22,8 +22,7 @@ public class PhotoController {
 
     @PostMapping
     public String addPhoto(@RequestParam("image") MultipartFile image) throws IOException {
-        String id = photoService.addPhoto(image.getOriginalFilename(),image);
-        return  id;
+        return  photoService.addPhoto(image.getOriginalFilename(),image);
     }
 
     @GetMapping("/{id}")

@@ -3,9 +3,9 @@ package com.softparadigm.mongo.mongdbspringboot.service.impl;
 import com.softparadigm.mongo.mongdbspringboot.domain.User;
 import com.softparadigm.mongo.mongdbspringboot.repository.UserRepository;
 import com.softparadigm.mongo.mongdbspringboot.service.UserService;
-import com.softparadigm.mongo.mongdbspringboot.strategyDesignPattern.CinValidationStrategy;
-import com.softparadigm.mongo.mongdbspringboot.strategyDesignPattern.NameValidationStrategy;
-import com.softparadigm.mongo.mongdbspringboot.strategyDesignPattern.UserValidationStrategy;
+import com.softparadigm.mongo.mongdbspringboot.strategydesignpattern.CinValidationStrategy;
+import com.softparadigm.mongo.mongdbspringboot.strategydesignpattern.NameValidationStrategy;
+import com.softparadigm.mongo.mongdbspringboot.strategydesignpattern.UserValidationStrategy;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -25,6 +25,9 @@ import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService {
+
+    private static final String CITY = "addresses.city";
+    private static final String POPULATION_COUNT = "populationCount";
     @Autowired
     private UserRepository userRepository;
 
@@ -45,8 +48,7 @@ public class UserServiceImpl implements UserService {
         boolean isValidId = validationId.validate(user);
         boolean isValidName = validationName.validate(user);
         boolean isValidCin = validationCin.validate(user);
-        boolean isValid = isValidId && isValidName && isValidCin;
-        return isValid;
+        return isValidId && isValidName && isValidCin;
     }
 
     /**
@@ -119,18 +121,16 @@ public class UserServiceImpl implements UserService {
         }
 
         if(city != null && !city.isEmpty()){
-            criteriaList.add(Criteria.where("addresses.city").is(city));
+            criteriaList.add(Criteria.where(CITY).is(city));
         }
 
         if(!criteriaList.isEmpty()){
             query.addCriteria(new Criteria().andOperator(criteriaList.toArray(new Criteria[0])));
         }
 
-        Page<User> users = PageableExecutionUtils.getPage(
+        return PageableExecutionUtils.getPage(
                 mongoTemplate.find(query, User.class),pageable,()-> mongoTemplate.count(query.skip(0).limit(0), User.class)
         );
-
-        return users;
     }
 
     /**
@@ -143,13 +143,11 @@ public class UserServiceImpl implements UserService {
 
         UnwindOperation unwindOperation = Aggregation.unwind("addresses");
         SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC,"age");
-        GroupOperation groupOperation = Aggregation.group("addresses.city").first(Aggregation.ROOT).as("oldestUser");
+        GroupOperation groupOperation = Aggregation.group(CITY).first(Aggregation.ROOT).as("oldestUser");
 
         Aggregation aggregation = Aggregation.newAggregation(unwindOperation,sortOperation,groupOperation);
 
-        List<Document> users = mongoTemplate.aggregate(aggregation, User.class, Document.class).getMappedResults();
-
-        return users;
+        return mongoTemplate.aggregate(aggregation, User.class, Document.class).getMappedResults();
     }
 
     /**
@@ -160,19 +158,17 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<Document> getPopulationByCity() {
         UnwindOperation unwindOperation = Aggregation.unwind(("addresses"));
-        GroupOperation groupOperation = Aggregation.group("addresses.city").count().as("populationCount");
-        SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC,"populationCount");
+        GroupOperation groupOperation = Aggregation.group(CITY).count().as(POPULATION_COUNT);
+        SortOperation sortOperation = Aggregation.sort(Sort.Direction.DESC,POPULATION_COUNT);
 
         ProjectionOperation projectionOperation = Aggregation.project()
                 .andExpression("_id").as("city")
-                .andExpression("populationCount").as("population")
+                .andExpression(POPULATION_COUNT).as("population")
                 .andExclude("_id");
 
         Aggregation aggregation = Aggregation.newAggregation(unwindOperation,sortOperation,groupOperation,projectionOperation);
 
-        List<Document> documents = mongoTemplate.aggregate(aggregation, User.class, Document.class).getMappedResults();
-
-        return documents;
+        return mongoTemplate.aggregate(aggregation, User.class, Document.class).getMappedResults();
     }
 
     /**
@@ -186,8 +182,7 @@ public class UserServiceImpl implements UserService {
         MatchOperation matchOperation = Aggregation.match(Criteria.where("skills").in(skill));
         ProjectionOperation projectionOperation = Aggregation.project("name","skills").andExclude("_id");
         Aggregation aggregation = Aggregation.newAggregation(matchOperation,projectionOperation);
-        List<Document> results = mongoTemplate.aggregate(aggregation, User.class, Document.class).getMappedResults();
-        return results;
+        return mongoTemplate.aggregate(aggregation, User.class, Document.class).getMappedResults();
     }
 
     /**
@@ -201,8 +196,7 @@ public class UserServiceImpl implements UserService {
         Query query = new Query(Criteria.where("name").regex(oldName));
         Update update = new Update().set("name", newName);
         FindAndModifyOptions options = new FindAndModifyOptions().returnNew(true);
-        User updatedUser = mongoTemplate.findAndModify(query, update, options, User.class);
-        return updatedUser;
+        return mongoTemplate.findAndModify(query, update, options, User.class);
     }
 
 }

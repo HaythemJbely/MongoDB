@@ -1,4 +1,4 @@
-package com.softparadigm.mongo.mongdbspringboot.strategyDesignPattern;
+package com.softparadigm.mongo.mongdbspringboot.strategydesignpattern;
 
 import com.softparadigm.mongo.mongdbspringboot.domain.User;
 
