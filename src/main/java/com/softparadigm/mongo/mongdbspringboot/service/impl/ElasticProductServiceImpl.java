@@ -30,6 +30,9 @@ import java.util.List;
 
 @Service
 public class ElasticProductServiceImpl implements ElasticProductService {
+
+    private static final String INDEX = "elasticproductindex";  // Compliant
+
     @Autowired
     private  RestHighLevelClient elasticClient;
 
@@ -50,8 +53,8 @@ public class ElasticProductServiceImpl implements ElasticProductService {
                 .withId(product.getId())
                 .withObject(product).build();
 
-        String documentId = elasticsearchOperations.index(indexQuery, IndexCoordinates.of("elasticproductindex"));
-        return documentId;
+
+        return elasticsearchOperations.index(indexQuery, IndexCoordinates.of(INDEX));
     }
 
     /**
@@ -69,12 +72,12 @@ public class ElasticProductServiceImpl implements ElasticProductService {
 
         SearchHits<ElasticProduct> productHits = elasticsearchOperations.search(searchQuery,
                 ElasticProduct.class,
-                IndexCoordinates.of("elasticproductindex"));
+                IndexCoordinates.of(INDEX));
 
-        List<ElasticProduct> productList = new ArrayList<ElasticProduct>();
-        productHits.forEach( productHit -> {
-            productList.add(productHit.getContent());
-        });
+        List<ElasticProduct> productList = new ArrayList<>();
+        productHits.forEach( productHit ->
+            productList.add(productHit.getContent())
+        );
         return productList;
     }
 
@@ -88,7 +91,7 @@ public class ElasticProductServiceImpl implements ElasticProductService {
      */
     @Override
     public SearchResponse getProductAggregations(String searchQuery, Integer minPrice, Integer maxPrice) throws IOException {
-        SearchRequest searchRequest = new SearchRequest("elasticproductindex");
+        SearchRequest searchRequest = new SearchRequest(INDEX);
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
         // Set the search query if provided

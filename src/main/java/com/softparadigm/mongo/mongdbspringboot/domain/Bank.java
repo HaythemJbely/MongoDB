@@ -1,10 +1,8 @@
 package com.softparadigm.mongo.mongdbspringboot.domain;
 
 import com.softparadigm.mongo.mongdbspringboot.service.Visitor;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.util.List;
 
 @Getter
 public class Bank extends Client{

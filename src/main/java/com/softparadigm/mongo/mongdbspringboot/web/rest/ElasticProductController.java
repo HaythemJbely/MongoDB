@@ -104,4 +104,9 @@ public class ElasticProductController {
         SearchHits<ElasticProduct> searchHits = elasticsearchOperations.search(searchQuery, ElasticProduct.class);
         return searchHits.stream().map(SearchHit::getContent).collect(Collectors.toList());
     }
+
+    @GetMapping("/findBy/{productName}")
+    public List<ElasticProduct> findByProductName(@PathVariable("productName") String productName) {
+        return elasticProductRepository.findByProductName(productName);
+    }
 }
