@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static org.elasticsearch.index.query.QueryBuilders.*;
 
@@ -57,6 +58,13 @@ public class ElasticProductController {
     @PostMapping
     public ElasticProduct createProduct(@RequestBody ElasticProduct product) {
         return elasticProductRepository.save(product);
+    }
+
+    @GetMapping
+    public List<ElasticProduct> findAll() {
+        Iterable<ElasticProduct> iterable = elasticProductRepository.findAll();
+        return StreamSupport.stream(iterable.spliterator(), false)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
