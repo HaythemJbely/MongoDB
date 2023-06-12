@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -84,8 +85,19 @@ public class ElasticProductController {
 
     @PutMapping("/{id}")
     public ElasticProduct updateProduct(@PathVariable String id, @RequestBody ElasticProduct product) {
-        product.setId(id);
-        return elasticProductRepository.save(product);
+        Optional<ElasticProduct> existingProduct = elasticProductRepository.findById(id);
+        if (existingProduct.isPresent()) {
+            existingProduct.get().setProductName(product.getProductName());
+            existingProduct.get().setProductDescription(product.getProductDescription());
+            existingProduct.get().setProductPrice(product.getProductPrice());
+            existingProduct.get().setQuantity(product.getQuantity());
+            existingProduct.get().setSportsCategory(product.getSportsCategory());
+            existingProduct.get().setManufacturer(product.getManufacturer());
+
+            return elasticProductRepository.save(existingProduct.get());
+        } else {
+            return null;
+        }
     }
 
     @DeleteMapping("/{id}")

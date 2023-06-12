@@ -1,0 +1,28 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/haythem
+    elasticsearch:
+      cluster-name: docker-cluster
+      cluster-nodes: localhost:9300
+
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
+
+  servlet:
+    multipart:
+      max-file-size: 256MB
+      max-request-size: 256MB
+      enabled: true
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: haithem.jbeli@esprit.tn
+    password: tvyzmbdiofkkifsd
+    properties:
+      mail:
+        smtp:
+          starttls:
+            enable: true

@@ -19,7 +19,11 @@ import com.softparadigm.mongo.mongdbspringboot.repository.UserRepository;
 import com.softparadigm.mongo.mongdbspringboot.security.jwt.JwtUtils;
 import com.softparadigm.mongo.mongdbspringboot.service.impl.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailException;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -51,6 +55,9 @@ public class AuthController {
 
     @Autowired
     JwtUtils jwtUtils;
+
+    @Autowired
+    private JavaMailSender javaMailSender;
 
     @PostMapping("/signin")
     public ResponseEntity<JwtResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -122,7 +129,24 @@ public class AuthController {
 
         user.setRoles(roles);
         userRepository.save(user);
+        // Send the email to the registered user
+        try {
+            sendRegistrationEmail(signUpRequest.getEmail());
+        } catch (MailException e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new MessageResponse("Error sending registration email"));
+        }
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+    }
+
+    private void sendRegistrationEmail(String recipientEmail) {
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setTo(recipientEmail);
+        mailMessage.setSubject("Welcome to SoftParadigm!");
+        mailMessage.setText("Thank you for choosing us! You can now login and enjoy our app !");
+
+        javaMailSender.send(mailMessage);
     }
 }
