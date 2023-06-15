@@ -1,4 +1,7 @@
 spring:
+  graphql:
+    graphiql:
+      enabled: true
   data:
     mongodb:
       uri: mongodb://localhost:27017/haythem

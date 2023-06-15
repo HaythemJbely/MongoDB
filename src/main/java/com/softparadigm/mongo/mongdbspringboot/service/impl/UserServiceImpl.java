@@ -198,6 +198,5 @@ public class UserServiceImpl implements UserService {
         FindAndModifyOptions options = new FindAndModifyOptions().returnNew(true);
         return mongoTemplate.findAndModify(query, update, options, User.class);
     }
-
 }
 
